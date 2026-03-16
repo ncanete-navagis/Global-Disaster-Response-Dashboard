@@ -11,7 +11,7 @@ function App() {
         <Layout>
         <Box sx={{ position: 'absolute', top: 24, left: 24, zIndex: 10 }}>
             <Typography variant="h1" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            Hi Nils <span role="img" aria-label="wave">👋</span>
+            Hi Niles <span role="img" aria-label="wave">👋</span>
             </Typography>
             <Typography variant="subtitle1" color="text.secondary" sx={{ fontWeight: 600 }}>
             Global Disaster Response Dashboard

@@ -1,33 +1,37 @@
-import React from 'react';
-import { Card, CardContent, Typography, Box, CircularProgress, LinearProgress } from '@mui/material';
+import React, { useState } from 'react';
+import { Card, CardContent, Typography, Box, CircularProgress, LinearProgress, Dialog, DialogTitle, DialogContent, DialogActions, Button, List, ListItem, ListItemText, IconButton, Divider } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import { useEarthquakes } from '../context/EarthquakeContext';
 import { formatDistanceToNow } from 'date-fns';
 
 const DashboardCards = () => {
   const { earthquakes, loading } = useEarthquakes();
+  const [earthquakesDialogOpen, setEarthquakesDialogOpen] = useState(false);
 
   return (
+    <>
       <Box sx={{ 
         position: 'absolute', 
         bottom: 24, 
         left: { xs: 12, md: 24 }, 
-        right: { xs: 12, md: 24 }, 
+        // Remove `right: 24` so it doesn't stretch 100% width, instead rely on max-width
         zIndex: 10,
         display: 'flex',
         flexDirection: { xs: 'column', md: 'row' },
         gap: { xs: 2, md: 3 },
         pointerEvents: 'none',
         maxHeight: { xs: '50vh', md: 'none' },
+        maxWidth: { xs: 'calc(100vw - 24px)', md: '1200px' }, // Limit width on large screens
         overflowY: { xs: 'auto', md: 'visible' },
         '&::-webkit-scrollbar': { display: 'none' } // Hide scrollbar for mobile overlay
       }}>
         
         {/* Earthquakes Card */}
-        <Card sx={{ flex: 1, pointerEvents: 'auto', backgroundColor: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(10px)' }}>
+        <Card sx={{ flex: 1, minWidth: { md: '300px' }, pointerEvents: 'auto', backgroundColor: 'rgba(255, 255, 255, 0.6)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255, 255, 255, 0.3)', boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15)' }}>
           <CardContent>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="h6">Recent Earthquakes</Typography>
-              <Typography variant="body2" color="primary" sx={{ cursor: 'pointer', fontWeight: 'bold' }}>See all</Typography>
+              <Typography variant="body2" color="primary" sx={{ cursor: 'pointer', fontWeight: 'bold' }} onClick={() => setEarthquakesDialogOpen(true)}>See all</Typography>
             </Box>
             
             {loading ? (
@@ -63,7 +67,7 @@ const DashboardCards = () => {
         </Card>
 
         {/* Safeguards Card */}
-        <Card sx={{ flex: 1, pointerEvents: 'auto', backgroundColor: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(10px)' }}>
+        <Card sx={{ flex: 1, minWidth: { md: '300px' }, pointerEvents: 'auto', backgroundColor: 'rgba(255, 255, 255, 0.6)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255, 255, 255, 0.3)', boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15)' }}>
           <CardContent>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="h6">Safeguards</Typography>
@@ -86,7 +90,7 @@ const DashboardCards = () => {
         </Card>
 
         {/* Policy Watches Card */}
-        <Card sx={{ flex: 1, pointerEvents: 'auto', backgroundColor: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(10px)' }}>
+        <Card sx={{ flex: 1, minWidth: { md: '300px' }, pointerEvents: 'auto', backgroundColor: 'rgba(255, 255, 255, 0.6)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255, 255, 255, 0.3)', boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15)' }}>
           <CardContent>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="h6">Policy Watches</Typography>
@@ -114,6 +118,79 @@ const DashboardCards = () => {
         </Card>
 
       </Box>
+
+      {/* Earthquakes Dialog */}
+      <Dialog 
+        open={earthquakesDialogOpen} 
+        onClose={() => setEarthquakesDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+            sx: { 
+                borderRadius: 3,
+                backgroundColor: 'rgba(255, 255, 255, 0.6)', 
+                backdropFilter: 'blur(20px)', 
+                border: '1px solid rgba(255, 255, 255, 0.3)', 
+                boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15)'
+            }
+        }}
+      >
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
+            All Recent Earthquakes
+            <IconButton onClick={() => setEarthquakesDialogOpen(false)} size="small">
+                <CloseIcon />
+            </IconButton>
+        </DialogTitle>
+        <DialogContent dividers>
+            {loading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>
+            ) : (
+                <List disablePadding>
+                    {earthquakes.map((eq, index) => (
+                        <React.Fragment key={eq.id}>
+                            <ListItem sx={{ px: 0, py: 2 }}>
+                                <ListItemText 
+                                    primary={
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                                            <Typography variant="subtitle1" fontWeight="bold">{eq.placeName || 'Unknown Location'}</Typography>
+                                            <Box sx={{ 
+                                                bgcolor: eq.magnitude >= 5 ? 'error.main' : eq.magnitude >= 4 ? 'warning.main' : 'success.main', 
+                                                color: 'white', 
+                                                px: 1, 
+                                                py: 0.5, 
+                                                borderRadius: 1 
+                                            }}>
+                                                <Typography variant="caption" fontWeight="bold">M {eq.magnitude.toFixed(1)}</Typography>
+                                            </Box>
+                                        </Box>
+                                    }
+                                    secondary={
+                                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mt: 1 }}>
+                                            <Typography variant="body2" color="text.secondary">
+                                                Time: {new Date(eq.timestamp).toLocaleString()} ({formatDistanceToNow(new Date(eq.timestamp), { addSuffix: true })})
+                                            </Typography>
+                                            <Typography variant="body2" color="text.secondary">
+                                                Depth: {eq.depthKm} km
+                                            </Typography>
+                                            <Typography variant="body2" color="text.secondary">
+                                                Coordinates: {eq.location.lat.toFixed(4)}, {eq.location.lng.toFixed(4)}
+                                            </Typography>
+                                        </Box>
+                                    }
+                                />
+                            </ListItem>
+                            {index < earthquakes.length - 1 && <Divider />}
+                        </React.Fragment>
+                    ))}
+                    {earthquakes.length === 0 && <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>No recent earthquake data available.</Typography>}
+                </List>
+            )}
+        </DialogContent>
+        <DialogActions>
+            <Button onClick={() => setEarthquakesDialogOpen(false)} color="inherit">Close</Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 };
 
